@@ -1,9 +1,13 @@
 package main
 
 import (
+
 	"log"
 
-	"github.com/MichaelGenchev/microservice/service/config"
+
+	"github.com/MichaelGenchev/microservice/internal/service/api"
+	"github.com/MichaelGenchev/microservice/internal/service/config"
+	"github.com/go-chi/chi/v5"
 )
 
 
@@ -15,31 +19,9 @@ func main() {
 	}
 
 	// Create a new router
-	// router := gin.New()
+	router := chi.NewMux()
 
 	// Set up the API routes and handlers
-	api.SetupRoutes(router)
+	api.SetupRoutesAndRun(router, cfg.Server.ListenAddr, nil)
 
-	// Create a new HTTP server
-	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
-		Handler: router,
-	}
-
-	// Start the server in a goroutine
-	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			log.Printf("listen: %s\n", err)
-		}
-	}()
-
-	// Wait for a shutdown signal
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	// Shut down the server gracefully
-	if err := srv.Shutdown(context.Background()); err != nil {
-		log.Fatal(err)
-	}
 }
